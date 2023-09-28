@@ -1,0 +1,15 @@
+.column {
+    flex: 33.33%;
+    height: 350px;
+    margin: 5px;
+    text-align: center;
+  }
+  .container {
+     display: flex;
+  }	
+
+@media screen and (max-width: 600px) {
+    .column {
+    width: 100% !important;
+    }
+}

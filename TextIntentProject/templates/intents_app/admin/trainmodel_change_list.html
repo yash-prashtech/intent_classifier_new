@@ -1,0 +1,87 @@
+{% extends "admin/import_export/change_list_import_export.html" %}
+{% comment %} {% extends "admin/change_list.html" %} {% endcomment %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static 'js/chart.js' %}"></script>
+    {% comment %} <script src="{% static 'css/admin.css' %}"></script> {% endcomment %}
+
+    <style>
+        .column2 {
+            flex: 70%;
+            height: 400px;
+            text-align: center;
+          }
+          .container2 {
+            flex: 50%;
+             display: flex;
+             margin-bottom: 15px;
+          }	
+        
+      
+    </style>
+{% endblock %}
+
+
+{% block object-tools-items %}
+    <li>
+    </li>
+    {{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="container2">
+        <div class="column2">
+            <div id="model_accuracy_chart"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawVisualization);
+  
+        function drawVisualization() {
+          // Some raw data (not necessarily accurate)
+          var data = google.visualization.arrayToDataTable({{gchart_model_data|safe}});
+  
+          var options = {
+            title : 'Model Accuracy Status (Latest 15)',
+            vAxis: {title: 'Model Accuracy %',
+                    viewWindow: {
+                        min: 50,
+                        max: 100
+                    },
+                    ticks: [50, 60, 70, 80, 90, 100] // display labels every 25
+                },
+            hAxis: {title: 'DateTime'},
+            seriesType: 'bars',
+            is3D: true,
+            'height':350,
+          };
+  
+          var chart = new google.visualization.ComboChart(document.getElementById('model_accuracy_chart'));
+          chart.draw(data, options);
+        }
+      </script>
+
+
+{{ block.super }}
+{% endblock %}
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart2);
+    function drawChart2() {
+      var data = google.visualization.arrayToDataTable({{gchart_intents_labels_count|safe}});
+      var options = {title: 'Intent Labels', 
+                      is3D: true,
+                      'width':400,
+                      'height':300
+                  };
+      var chart = new google.visualization.PieChart(document.getElementById('intents_quantity_chart'));
+      chart.draw(data, options);
+    }
+</script>

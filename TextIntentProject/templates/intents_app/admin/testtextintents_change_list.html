@@ -1,0 +1,161 @@
+{% extends "admin/import_export/change_list_import_export.html" %}
+{% comment %} {% extends "admin/change_list.html" %} {% endcomment %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static 'js/chart.js' %}"></script>
+    {% comment %} <script src="{% static 'css/admin.css' %}"></script> {% endcomment %}
+
+    <style>
+        .column {
+            flex: 33.33%;
+            height: 350px;
+            margin: 5px;
+            text-align: center;
+          }
+          .container {
+             display: flex;
+          }	
+        
+        @media screen and (max-width: 600px) {
+            .column {
+            width: 100% !important;
+            }
+        }
+    </style>
+{% endblock %}
+
+
+{% block object-tools-items %}
+    <li>
+        <a href="update-guess-intents/" class="grp-state-focus " style="background:#447e9b;">Update ALL Guess Intents</a>
+    </li>
+    {{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="column">
+            <div id="match_unmatch_chart"></div>
+        </div>
+        <div class="column">
+            <div id="intents_quantity_chart"></div>
+        </div>
+        <div class="column">
+
+        </div>
+    </div>
+
+   
+
+    {% comment %} <div class="row" id="chart_div">
+        <div class="column"><div id="match_unmatch_chart"></div></div>
+        <div class="column"><div id="intents_quantity_chart"></div></div>
+        <div class="column"></div>
+    </div> {% endcomment %}
+
+    {% comment %} <div id="chart_div" style="width:400px; height:300px;" >
+        <div id="match_unmatch_chart"></div>
+        <div id="intents_quantity_chart"></div>
+    </div>  {% endcomment %}
+   
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable({{gchart_match_unmatch_data|safe}});
+
+        var options = {title: 'Intent (Model Accuracy) Status', 
+                        is3D: true,
+                        'width':400,
+                        'height':300,
+                        chartArea: {
+                            left: "3%",
+                            top: "13%",
+                            height: "94%",
+                            width: "94%"
+                        },
+                        pieSliceTextStyle: {
+                          fontSize: 12
+                        },
+                        sliceVisibilityThreshold: 0,
+                        pieResidueSliceLabel: 'Otros'
+                    };
+        var chart = new google.visualization.PieChart(document.getElementById('match_unmatch_chart'));
+        chart.draw(data, options);
+      }
+    </script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart2);
+        function drawChart2() {
+          var data = google.visualization.arrayToDataTable({{gchart_intents_labels_count|safe}});
+          var options = {title: 'Intent Labels', 
+                          is3D: true,
+                          'width':400,
+                          'height':300,
+                          chartArea: {
+                            left: "3%",
+                            top: "13%",
+                            height: "94%",
+                            width: "94%"
+                        },
+                        pieSliceTextStyle: {
+                          fontSize: 12
+                        },
+                        sliceVisibilityThreshold: 0,
+                        pieResidueSliceLabel: 'Otros'
+                      };
+          var chart = new google.visualization.PieChart(document.getElementById('intents_quantity_chart'));
+          chart.draw(data, options);
+        }
+    </script>
+
+
+{{ block.super }}
+{% endblock %}
+{% comment %} 
+
+
+<div style="width: 40%; height: 300px;margin: 50px auto;">
+    <canvas id="match_unmatch_chart" ></canvas>
+</div>
+<script>
+    const ctx = document.getElementById('match_unmatch_chart');
+    var myChart = new Chart(ctx, {  
+        type: 'pie',
+        data: { 
+            datasets: [{
+                label: 'Intent Match Status',
+                data: {{ data|safe }},
+                backgroundColor: ['#4BB543', '#ff0e0e'],
+            }],
+            labels: {{ labels|safe }}
+        },
+        options: {
+             responsive: true,
+             maintainAspectRatio: true,
+             plugins: {
+                labels: {
+                    render: 'percentage',
+                    fontColor: ['white', 'white',],
+                    precision: 2
+                },
+                legend: {
+                  position: 'top',
+                },
+                title: {
+                  text: 'Intent Match Chart',
+                  display: true,
+
+                },
+                
+            },
+        }
+    });
+</script> {% endcomment %}

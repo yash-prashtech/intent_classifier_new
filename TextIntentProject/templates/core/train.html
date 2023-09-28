@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% load static %}
+
+{% block extracss %}
+<style>
+  .supclass {
+    top: -1rem;
+    left: -0.5rem;
+    color: #666666;
+    font-size: 14px;
+}
+    /* This hides the default radio buttons */
+    [type="checkbox"]:checked,
+    [type="checkbox"]:not(:checked),
+    [type="radio"]:checked,
+    [type="radio"]:not(:checked){
+        position: absolute;
+        left: -9999px;
+        width: 0;
+        height: 0;
+        visibility: hidden;
+    }
+    
+    [type="radio"]:checked,
+    [type="radio"]:not(:checked) {
+      position: relative;
+      left: 14px;
+      z-index: 99;
+    }
+    
+    .checkbox-tools:checked + label,
+    .checkbox-tools:not(:checked) + label {
+        margin-right: 10px;
+        position: relative;
+        display: inline-block;
+        padding: 20px 20px 20px 20px;
+        font-size: 14px;
+        letter-spacing: 0px;
+        text-align: left;
+        border-radius: 4px;
+        text-transform: uppercase;
+        color: black;
+        -webkit-transition: box-shadow 150ms ease;
+        transition: box-shadow 150ms ease;
+        left: 5%;
+    }
+    
+    {% comment %} .checkbox-tools:checked + label {
+        background-color: #080808;
+        border: 2px solid #fffbfb;
+        color: #fff;
+        /* box-shadow: 0 8px 16px 0 rgb(0 0 0 / 20%); */
+        box-shadow: 0 2px 4px 0 rgb(255 251 251 / 20%);
+    } {% endcomment %}
+
+    .checkbox-tools:checked + label {
+      background-color: #080808;
+      border: 2px solid #525252;
+      color: #6c6c6c;
+      /* box-shadow: 0 8px 16px 0 rgb(0 0 0 / 20%); */
+      box-shadow: 0 2px 4px 0 rgb(255 251 251 / 20%);
+  }
+
+    
+    .checkbox-tools:not(:checked) + label {
+      background-color: #423e3e;
+      border: 1px solid transparent;
+      box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
+      color: #858585;
+  }
+    
+    .checkbox-tools:not(:checked) + label:hover,
+    .checkbox-tools:checked + label:hover,
+    [type="radio"]:hover + label {
+      box-shadow: 0 8px 12px 0 rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      -webkit-transition: box-shadow 300ms ease;
+      transition: box-shadow 300ms ease;
+    }
+
+
+
+    .form-control-2 {
+      display: block;
+      width: 100%;
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: -9.5;
+      color: #9d9d9d;
+      background-color: #585555;
+      background-clip: padding-box;
+      border: 2px solid #525354;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      border-radius: 0.25rem;
+      transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  }
+
+  .btn-dark-2 {
+    color: #666;
+    background-color: #323232;
+    border-color: #303030;
+}
+</style>
+{% endblock extracss %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center my-5">
+      <div class="col-lg-9 col-md-9 col-sm-11">
+        <div class="card border-0 shadow-lg " style="
+        background-color: #525050;
+        color: gray;
+    ">
+          <div class="card-body py-1 px-1 px-sm-1">
+            <h2 class="h3 text-center my-3">Train Text | ID {{text_obj.pk}} | Intent Guess: {{pre_guess_intent_result|title }} <br>
+               {% if already_trained %} Already Saved with Intent: {{text_obj.get_intent_display}}{% endif %}</h2>
+            <form class="p-2" method="POST" action="." id="trainForm">
+                <input type="hidden" name="text_uid" value="{{text_obj.uid}}">
+              {% csrf_token %}
+                <div >
+                    <textarea class="form-control form-control-2" required name="text_intent" id="text_intent" rows="4" placeholder="One Message Per Line" >{{text_obj.text}}</textarea>
+                </div>
+                <div class="container my-4">
+                    <input class="checkbox-tools" type="radio" name="intent_options" id="interested_general" value="interested_general" {% if pre_guess_intent_result == 'interested_general' %} checked {% endif %} onclick="this.form.submit()">
+                    <label for="interested_general"><sup class="supclass">1</sup> Interested General</label>
+                    <input class="checkbox-tools" type="radio" name="intent_options" id="neutral" value="neutral" {% if pre_guess_intent_result == 'neutral' %} checked {% endif %} onclick="this.form.submit()">
+                    <label for="neutral"><sup class="supclass">2</sup> Neutral</label>
+                    <input class="checkbox-tools" type="radio" name="intent_options" id="opt_out" value="opt_out" onclick="this.form.submit()">
+                    <label for="opt_out"><sup class="supclass">3</sup> OptOut</label>
+                    <input class="checkbox-tools" type="radio" name="intent_options" id="skip" value="skiped" onclick="this.form.submit()">
+                    <label for="skip"><sup class="supclass">4</sup> Skip</label>
+                </div>
+                
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row col-6 offset-3">
+      <a  href="{% url 'core:single_text_train_data' previous_post_id %}" class="col btn btn-dark-2 mx-4">Previous</a>
+      <a  href="{% url 'core:single_text_train_data' next_post_id %}" class="col btn btn-dark-2">Next</a>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block extrajs %}
+<script type="text/javascript">
+    var btn_evnt = document.getElementById('submit_btn_process');
+    btn_evnt.addEventListener('click', function () {
+      if(document.getElementById("text_intent").value !=''){
+        btn_evnt.innerHTML = "Training.....";
+      }
+    });
+</script>
+
+<script>
+
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
+</script>
+
+<script>
+  document.addEventListener('keypress', (event) => {
+    if(event.key && event.key   == 'Enter'){
+      document.getElementById("trainForm").submit();
+    }
+
+    if(event.key && event.key == '1'){
+      document.getElementById("interested_general").checked = true;
+    }
+    else if (event.key && event.key == '2'){
+      document.getElementById("neutral").checked = true;
+
+    }
+    else if (event.key && event.key == '3'){
+      document.getElementById("opt_out").checked = true;
+
+    }
+   
+    else if (event.key && event.key == '4'){
+      document.getElementById("skip").checked = true;
+
+    }
+   
+});
+
+</script>
+
+
+{% endblock extrajs %}
+
+
+
+
+
+
+
+

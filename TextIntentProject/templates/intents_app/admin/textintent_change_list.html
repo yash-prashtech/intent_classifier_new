@@ -1,0 +1,107 @@
+{% extends "admin/import_export/change_list_import_export.html" %}
+{% comment %} {% extends "admin/change_list.html" %} {% endcomment %}
+{% load static %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static 'js/chart.js' %}"></script>
+    {% comment %} <script src="{% static 'css/admin.css' %}"></script> {% endcomment %}
+
+    <style>
+        .column {
+            flex: 33.33%;
+            height: 350px;
+            margin: 5px;
+            text-align: center;
+          }
+          .container {
+             display: flex;
+          }	
+        
+        @media screen and (max-width: 600px) {
+            .column {
+            width: 100% !important;
+            }
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="column">
+            <div id="gchart_intent_infos"></div>
+        </div>
+        <div class="column">
+            <div id="gchart_approval_info"></div>
+        </div>
+        <div class="column">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable({{gchart_intent_infos|safe}});
+
+        var options = {title: 'Text Intent Status', 
+                        is3D: true,
+                        'width':400,
+                        'height':300,
+                        chartArea: {
+                            left: "3%",
+                            top: "13%",
+                            height: "94%",
+                            width: "94%"
+                        },
+                        pieSliceTextStyle: {
+                            fontSize: 12
+                          },
+                        sliceVisibilityThreshold: 0,
+                        pieResidueSliceLabel: 'Otros'
+                       
+                    };
+        var chart = new google.visualization.PieChart(document.getElementById('gchart_intent_infos'));
+        chart.draw(data, options);
+      }
+    </script>
+
+    <script type="text/javascript">
+        
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+  
+        function drawChart() {
+  
+          var data = google.visualization.arrayToDataTable({{gchart_approval_info|safe}});
+  
+          var options = {title: 'Text Approval Status', 
+                          is3D: true,
+                          'width':400,
+                          'height':300,
+                        chartArea: {
+                            left: "3%",
+                            top: "13%",
+                            height: "94%",
+                            width: "94%"
+                        },
+                        pieSliceTextStyle: {
+                          fontSize: 12
+                        },
+                        sliceVisibilityThreshold: 0,
+                        pieResidueSliceLabel: 'Otros'
+
+                      };
+          var chart = new google.visualization.PieChart(document.getElementById('gchart_approval_info'));
+          chart.draw(data, options);
+        }
+      </script>
+
+{{ block.super }}
+{% endblock %}
+
